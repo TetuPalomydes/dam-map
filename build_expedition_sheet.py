@@ -120,7 +120,7 @@ def build_html(rows: list, path: Path, regions: list, max_rows: int = 800):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>遠征計画 座標別一覧（cw / em 切り替え）</title>
+<title>遠征計画 座標別一覧（w / E1 切り替え）</title>
 <style>
 * { box-sizing: border-box; }
 body { font-family: "Meiryo", "Yu Gothic", sans-serif; margin: 12px; background: #1a1a2e; color: #eee; }
@@ -152,10 +152,10 @@ a:visited { color: #b58eff; }
 </head>
 <body>
 <h1>遠征計画 座標別一覧（1枚シート）</h1>
-<p>砦リストを <strong>cw</strong> と <strong>em</strong> で切り替えて表示。並びは地域→Y降順→X昇順。</p>
+<p>砦リストを <strong>w</strong> と <strong>E1</strong> で切り替えて表示。並びは地域→Y降順→X昇順。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
-  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw" checked> <span>砦リスト cw</span></label>
-  <label class="opt-em"><input type="radio" name="listSwitch" value="em"> <span>砦リスト em</span></label>
+  <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
+  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>E1</span></label>
 </div>
 <div class="wrap">
 <table>
@@ -312,10 +312,10 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 </head>
 <body>
 <h1>遠征計画 座標マップ（シート状・位置ひと目で確認）</h1>
-<p>座標別に砦を配置。★で等級を表示。リストを切り替えて cw / em を表示。</p>
+<p>座標別に砦を配置。★で等級を表示。リストを切り替えて w / E1 を表示。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
-  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw" checked> <span>砦リスト cw</span></label>
-  <label class="opt-em"><input type="radio" name="listSwitch" value="em"> <span>砦リスト em</span></label>
+  <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
+  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>E1</span></label>
 </div>
 <div class="map-wrap">
 <svg id="map" viewBox="{x_min} {-y_max} {w} {h}" xmlns="http://www.w3.org/2000/svg">
