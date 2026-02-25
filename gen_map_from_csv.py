@@ -200,7 +200,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
       if (p.l !== listFilter) continue;
       if (p.x < visX1 - 50 || p.x > visX2 + 50 || p.y < visY1 - 50 || p.y > visY2 + 50) continue;
       var s = toScreen(p.x, p.y);
-      var r = 3 + Math.min(p.st || 1, 9);
+      var r = 3 + Math.min(Math.max(p.st || 1, 5), 9);  /* ★5以下は★5と同じサイズ */
       var rad = r * totalScale;
       if (rad < 0.5) continue;
       var st = statusMap[p.n];
@@ -231,7 +231,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
     for (var i = 0; i < FORT_DATA.length; i++) {{
       var p = FORT_DATA[i];
       if (p.l !== listFilter) continue;
-      var r = 3 + Math.min(p.st || 1, 9);
+      var r = 3 + Math.min(Math.max(p.st || 1, 5), 9);  /* ★5以下は★5と同じサイズ */
       var thresh = (r + 4) * totalScale;
       var dx = p.x - m.x, dy = p.y - m.y;
       var d = dx * dx + dy * dy;
