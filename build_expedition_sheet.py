@@ -9,8 +9,8 @@ import csv
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
-MAP_BASE = "https://c2.3gokushi.jp/map.php"
-AUTO_BASE = "https://c2.3gokushi.jp/auto_send_troop/index.php"
+MAP_BASE = "https://w1.3gokushi.jp/map.php"
+AUTO_BASE = "https://w1.3gokushi.jp/auto_send_troop/index.php"
 
 
 def load_regions(path: Path) -> list:
