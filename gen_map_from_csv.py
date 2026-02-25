@@ -27,9 +27,10 @@ def main():
             kind = row["種別"]
             list_id = "cw" if "cw2" in kind else "em"
             auto_url = (row.get("自動出兵SC") or "").strip()
+            map_url = (row.get("MAP") or "").strip()
             points.append({
                 "x": x, "y": y, "n": row["名称"], "s": row["★"],
-                "st": star_level(row["★"]), "l": list_id, "u": auto_url
+                "st": star_level(row["★"]), "l": list_id, "u": auto_url, "m": map_url
             })
 
     xs = [p["x"] for p in points]
@@ -85,10 +86,13 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 .tip {{ position: fixed; background: #252530; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; font-size: 12px; max-width: 280px; z-index: 10; pointer-events: none; display: none; }}
 .tip .auto-link-hint {{ color: #8ecc6e; font-size: 11px; margin-top: 4px; }}
 .note {{ margin-top: 8px; font-size: 11px; color: #888; }}
+.nav-links {{ margin-bottom: 6px; font-size: 13px; }}
+.nav-links a {{ color: #6eb5ff; }}
 </style>
 </head>
 <body>
 <h1>遠征計画 座標マップ（シート状・位置ひと目で確認）</h1>
+<p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a></p>
 <p>座標別に砦を配置。★で等級表示。リスト切り替え・ドラッグ・ホイール拡大縮小・砦クリックで自動出兵。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
   <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
@@ -343,7 +347,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
       if (pt) {{
         var txt = pt.n + ' (' + pt.x + ',' + pt.y + ') ' + (pt.s || '');
         if (statusMap[pt.n]) txt += ' [' + statusMap[pt.n] + ']';
-        if (pt.u) tip.innerHTML = txt + '<div class="auto-link-hint">クリックで自動出兵ページを開く</div>';
+        if (pt.u || pt.m) tip.innerHTML = txt + '<div class="auto-link-hint">左クリック: 自動出兵　右クリック: MAP</div>';
         else tip.textContent = txt;
         tip.style.display = 'block';
       }} else tip.style.display = 'none';
@@ -354,10 +358,16 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 
   wrap.addEventListener('click', function(e) {{
     if (e.pointerType === 'touch') return;
+    if (e.button !== 0) return;
     if (drag.startX !== e.clientX || drag.startY !== e.clientY) return;
     var rect = wrap.getBoundingClientRect();
     var pt = hitTest(e.clientX - rect.left, e.clientY - rect.top);
     if (pt && pt.u) window.open(pt.u, '_blank');
+  }});
+  wrap.addEventListener('contextmenu', function(e) {{
+    var rect = wrap.getBoundingClientRect();
+    var pt = hitTest(e.clientX - rect.left, e.clientY - rect.top);
+    if (pt && pt.m) {{ e.preventDefault(); window.open(pt.m, '_blank'); }}
   }});
 
   document.querySelectorAll('input[name="listSwitch"]').forEach(function(r) {{

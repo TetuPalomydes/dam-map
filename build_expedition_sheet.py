@@ -148,6 +148,11 @@ td.num { text-align: right; }
 a { color: #6eb5ff; }
 a:visited { color: #b58eff; }
 .note { margin-top: 12px; font-size: 11px; color: #888; }
+.region-toggle { display: flex; gap: 6px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; }
+.region-toggle .region-btn { padding: 4px 10px; border-radius: 4px; border: 1px solid #444; background: #252540; color: #ccc; font-size: 12px; cursor: pointer; }
+.region-toggle .region-btn:hover { background: #2d2d4a; color: #fff; }
+.region-toggle .region-btn.active { background: #3d4a6e; border-color: #6e9ecc; color: #fff; }
+tr[data-region].region-hidden { display: none; }
 </style>
 </head>
 <body>
@@ -156,6 +161,10 @@ a:visited { color: #b58eff; }
 <div class="toggle" role="group" aria-label="リスト切り替え">
   <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
   <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>E1</span></label>
+</div>
+<div class="region-toggle" role="group" aria-label="地域で絞り込み">
+  <button type="button" class="region-btn active" data-region="">すべて</button>
+  <!--REGION_BUTTONS-->
 </div>
 <div class="wrap">
 <table>
@@ -168,20 +177,33 @@ a:visited { color: #b58eff; }
 </tbody>
 </table>
 </div>
-<div class="note">※ 全件は 遠征計画_座標別一覧.csv をスプレッドシートに取り込んで利用してください。HTMLは最大{}件まで表示しています。</div>
+<div class="note">※ 全件は 遠征計画_座標別一覧.csv をスプレッドシートに取り込んで利用してください。HTMLは最大{0}件まで表示しています。</div>
 <script>
-(function(){
+(function(){{
   var radios = document.querySelectorAll('input[name="listSwitch"]');
   var rows = document.querySelectorAll('tbody tr[data-list]');
-  function update() {
+  var regionBtns = document.querySelectorAll('.region-btn');
+  var currentRegion = '';
+  function update() {{
     var v = document.querySelector('input[name="listSwitch"]:checked').value;
-    rows.forEach(function(tr) {
-      tr.classList.toggle('hidden', tr.getAttribute('data-list') !== v);
-    });
-  }
-  radios.forEach(function(r){ r.addEventListener('change', update); });
+    rows.forEach(function(tr) {{
+      var listMatch = tr.getAttribute('data-list') === v;
+      var regionMatch = !currentRegion || tr.getAttribute('data-region') === currentRegion;
+      tr.classList.toggle('hidden', !listMatch);
+      tr.classList.toggle('region-hidden', !regionMatch);
+    }});
+  }}
+  radios.forEach(function(r){{ r.addEventListener('change', update); }});
+  regionBtns.forEach(function(btn){{
+    btn.addEventListener('click', function(){{
+      regionBtns.forEach(function(b){{ b.classList.remove('active'); }});
+      btn.classList.add('active');
+      currentRegion = btn.getAttribute('data-region') || '';
+      update();
+    }});
+  }});
   update();
-})();
+}})();
 </script>
 </body>
 </html>
@@ -190,19 +212,27 @@ a:visited { color: #b58eff; }
     def esc(s):
         return (s or "").replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;").replace('"', "&quot;")
 
+    # 全方位の地域ボタンを常に表示（データに無い地域を押すと0件表示）
+    region_order = ["北西", "北", "北東", "西", "中原", "東", "南西", "南", "南東"]
+    region_buttons_html = "\n".join(
+        f'  <button type="button" class="region-btn" data-region="{esc(r)}">{esc(r)}</button>' for r in region_order
+    )
+    head_final = head.replace("<!--REGION_BUTTONS-->", region_buttons_html)
+
     body_rows = []
     for r in rows[:max_rows]:
         region, x, y, kind, name, star, map_url, auto_url = r[0], r[1], r[2], r[3], r[4], r[5], r[6], r[7]
         data_list = "cw" if "cw2" in kind else "em"
         css = "kind-cw" if data_list == "cw" else "kind-em"
+        region_attr = esc(region) if region else ""
         body_rows.append(
-            f'<tr class="{css}" data-list="{data_list}">'
+            f'<tr class="{css}" data-list="{data_list}" data-region="{region_attr}">'
             f'<td>{esc(region)}</td><td class="num">{x}</td><td class="num">{y}</td><td>{esc(kind)}</td><td>{esc(name)}</td><td>{esc(star)}</td>'
             f'<td><a href="{esc(map_url)}" target="_blank">MAP</a></td>'
             f'<td><a href="{esc(auto_url)}" target="_blank">自動出兵SC</a></td><td></td></tr>'
         )
 
-    path.write_text(head + "\n".join(body_rows) + foot, encoding="utf-8")
+    path.write_text(head_final + "\n".join(body_rows) + foot, encoding="utf-8")
 
 
 def _star_level(star_str: str) -> int:
@@ -308,10 +338,13 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 .marker:hover .marker-circle {{ stroke-width: 2; filter: brightness(1.2); }}
 .tip {{ position: fixed; background: #252530; border: 1px solid #444; padding: 6px 10px; border-radius: 4px; font-size: 12px; max-width: 280px; z-index: 10; pointer-events: none; display: none; }}
 .note {{ margin-top: 8px; font-size: 11px; color: #888; }}
+.nav-links {{ margin-bottom: 6px; font-size: 13px; }}
+.nav-links a {{ color: #6eb5ff; }}
 </style>
 </head>
 <body>
 <h1>遠征計画 座標マップ（シート状・位置ひと目で確認）</h1>
+<p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a></p>
 <p>座標別に砦を配置。★で等級を表示。リストを切り替えて w / E1 を表示。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
   <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
