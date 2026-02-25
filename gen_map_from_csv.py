@@ -93,7 +93,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 <body>
 <h1>遠征計画 座標マップ（シート状・位置ひと目で確認）</h1>
 <p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a></p>
-<p>座標別に砦を配置。★で等級表示。リスト切り替え・ドラッグ・ホイール拡大縮小・砦クリックで自動出兵。</p>
+<p>座標別に砦を配置。★で等級表示。リスト切り替え・ドラッグ・ホイール拡大縮小。砦は左クリック：自動出兵　右クリック：MAP表示。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
   <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
   <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>E1</span></label>
@@ -107,7 +107,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
   <canvas id="can"></canvas>
 </div>
 <div id="tip" class="tip"></div>
-<div class="note">※ PC: ドラッグで移動・ホイールで拡大縮小。スマホ: ドラッグで移動・ピンチで拡大縮小・タップで砦の自動出兵を開く。＋/−ボタンでも拡大縮小可。Y軸は北が上。</div>
+<div class="note">※ PC: 左クリックで自動出兵・右クリックでMAP表示。ドラッグで移動・ホイールで拡大縮小。スマホ: ドラッグで移動・ピンチで拡大縮小・タップで自動出兵を開く。＋/−ボタンでも拡大縮小可。Y軸は北が上。</div>
 <script id="fortData" type="application/json">{fort_json}</script>
 <script id="viewData" type="application/json">{view_json}</script>
 <script>
