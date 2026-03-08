@@ -11,7 +11,7 @@ OUT_PATH = BASE / "遠征計画_座標マップ.html"
 
 # 完全自動連動: 砦攻略のAPIを指定するとマップが常に最新の攻略状況を取得する（未設定時は同梱の fort_status.json を使用）
 FORT_STATUS_URL = ""   # w用。例: "https://npc-strategy-sheet.vercel.app/api/fort_status"
-FORT_STATUS_URL_CW = ""  # c4用。例: "https://npc-strategy-sheet.vercel.app/api/fort_status?event=e1"。未設定時は FORT_STATUS_URL を流用
+FORT_STATUS_URL_CW = ""  # c4用。砦攻略の cw2 CSV の event_id に合わせる（現在は e1 → ?event=e1）。未設定時は FORT_STATUS_URL を流用
 
 
 def star_level(s):
