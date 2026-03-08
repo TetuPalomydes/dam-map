@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>遠征計画 座標マップ（w1）</title>
+<title>遠征計画 座標マップ（c4）</title>
 <style>
 * { box-sizing: border-box; }
 body { font-family: "Meiryo","Yu Gothic",sans-serif; margin: 12px; background: #1a1a2e; color: #eee; }
@@ -23,8 +23,8 @@ h1 { font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }
 </style>
 </head>
 <body>
-<h1>遠征計画 座標マップ（w1）</h1>
-<p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a> ｜ <a href="遠征計画_座標マップ_c4.html">座標マップ（c4）</a></p>
+<h1>遠征計画 座標マップ（c4）</h1>
+<p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a> ｜ <a href="遠征計画_座標マップ_w1.html">座標マップ（w1）</a></p>
 <p>座標別に砦を配置。★で等級表示。ドラッグ・ホイール拡大縮小。砦は左クリック：自動出兵　右クリック：MAP表示。</p>
 
 <div class="map-toolbar">
@@ -54,14 +54,14 @@ h1 { font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }
   var scale = 1, panX = 0, panY = 0;
   var drag = { on: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0 };
   var pinch = { on: false, startDist: 0, startScale: 0, startPanX: 0, startPanY: 0, centerMapX: 0, centerMapY: 0 };
-  var listFilter = 'em';
+  var listFilter = 'cw';
   var hoverPt = null;
   var statusMap_em = {}, statusMap_cw = {};
   var fortStatusUrl = "";
   var fortStatusUrlCw = "";
-  var urlEm = fortStatusUrl || 'fort_status.json';
-  fetch(urlEm).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; }).then(function(o) {
-    statusMap_em = o || {};
+  var urlCw = (fortStatusUrlCw && fortStatusUrlCw !== '') ? fortStatusUrlCw : 'fort_status_c4.json';
+  fetch(urlCw).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; }).then(function(o) {
+    statusMap_cw = o || {};
     draw();
   });
 

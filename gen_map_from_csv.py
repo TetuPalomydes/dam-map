@@ -7,7 +7,10 @@ from pathlib import Path
 
 BASE = Path(__file__).parent
 CSV_PATH = BASE / "遠征計画_座標別一覧.csv"
-OUT_PATH = BASE / "遠征計画_座標マップ.html"
+# URL別に出力（砦攻略管理と同様）。w1 用・c4 用で別ページにし、機能の混乱を避ける
+OUT_PATH_W1 = BASE / "遠征計画_座標マップ_w1.html"
+OUT_PATH_C4 = BASE / "遠征計画_座標マップ_c4.html"
+OUT_PATH = BASE / "遠征計画_座標マップ.html"  # 従来URL用＝w1 と同じ内容
 
 # 完全自動連動: 砦攻略のAPIを指定するとマップが常に最新の攻略状況を取得する（未設定時は同梱の fort_status.json を使用）
 FORT_STATUS_URL = ""   # w用。例: "https://npc-strategy-sheet.vercel.app/api/fort_status"
@@ -61,23 +64,57 @@ def main():
     fort_status_url_js = json.dumps(FORT_STATUS_URL)
     fort_status_url_cw_js = json.dumps(FORT_STATUS_URL_CW)
 
-    html = f"""<!DOCTYPE html>
+    for list_mode, out_path in [
+        ("em", OUT_PATH_W1),
+        ("cw", OUT_PATH_C4),
+        ("em", OUT_PATH),
+    ]:
+        html = _build_map_html(
+            list_mode=list_mode,
+            fort_json=fort_json,
+            view_json=view_json,
+            w=w, h=h,
+            fort_status_url_js=fort_status_url_js,
+            fort_status_url_cw_js=fort_status_url_cw_js,
+        )
+        out_path.write_text(html, encoding="utf-8")
+        label = "w1" if list_mode == "em" else "c4"
+        print(f"Generated: {out_path} ({len(points)} points, {label})")
+
+
+def _build_map_html(*, list_mode, fort_json, view_json, w, h, fort_status_url_js, fort_status_url_cw_js):
+    """list_mode: 'em'=w1用, 'cw'=c4用。URL別で1リストのみ表示し、攻略状況もそのURL用のみ取得。"""
+    is_em = list_mode == "em"
+    page_title = "遠征計画 座標マップ（w1）" if is_em else "遠征計画 座標マップ（c4）"
+    list_filter_js = "'em'" if is_em else "'cw'"
+    nav_other = '<a href="遠征計画_座標マップ_c4.html">座標マップ（c4）</a>' if is_em else '<a href="遠征計画_座標マップ_w1.html">座標マップ（w1）</a>'
+    toggle_html = ""  # URL別なのでトグルなし
+    if is_em:
+        fetch_js = r"""
+  var urlEm = fortStatusUrl || 'fort_status.json';
+  fetch(urlEm).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; }).then(function(o) {
+    statusMap_em = o || {};
+    draw();
+  });"""
+    else:
+        fetch_js = r"""
+  var urlCw = (fortStatusUrlCw && fortStatusUrlCw !== '') ? fortStatusUrlCw : 'fort_status_c4.json';
+  fetch(urlCw).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; }).then(function(o) {
+    statusMap_cw = o || {};
+    draw();
+  });"""
+    list_switch_script = ""  # トグルなしなので不要
+
+    return f"""<!DOCTYPE html>
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>遠征計画 座標マップ（シート状配置）</title>
+<title>{page_title}</title>
 <style>
 * {{ box-sizing: border-box; }}
 body {{ font-family: "Meiryo","Yu Gothic",sans-serif; margin: 12px; background: #1a1a2e; color: #eee; }}
 h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
-.toggle {{ display: flex; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }}
-.toggle label {{ display: flex; align-items: center; gap: 6px; cursor: pointer; padding: 4px 10px; border-radius: 4px; border: 1px solid #555; font-size: 13px; }}
-.toggle label:hover {{ background: #252540; }}
-.toggle .opt-cw {{ color: #b8d4ee; }}
-.toggle .opt-em {{ color: #d4eeb8; }}
-.toggle .opt-cw:has(input:checked) {{ background: #2d4a6e; border-color: #6e9ecc; }}
-.toggle .opt-em:has(input:checked) {{ background: #4a6e2d; border-color: #8ecc6e; }}
 .map-toolbar {{ display: flex; align-items: center; gap: 10px; margin-bottom: 8px; flex-wrap: wrap; }}
 .map-toolbar .zoom-btn {{ width: 32px; height: 28px; border: 1px solid #555; border-radius: 4px; background: #2a2a3e; color: #ccc; font-size: 18px; cursor: pointer; line-height: 1; }}
 .map-toolbar .zoom-btn:hover {{ background: #353550; color: #fff; }}
@@ -93,13 +130,10 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 </style>
 </head>
 <body>
-<h1>遠征計画 座標マップ（シート状・位置ひと目で確認）</h1>
-<p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a></p>
-<p>座標別に砦を配置。★で等級表示。リスト切り替え・ドラッグ・ホイール拡大縮小。砦は左クリック：自動出兵　右クリック：MAP表示。</p>
-<div class="toggle" role="group" aria-label="リスト切り替え">
-  <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
-  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>c4</span></label>
-</div>
+<h1>{page_title}</h1>
+<p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a> ｜ {nav_other}</p>
+<p>座標別に砦を配置。★で等級表示。ドラッグ・ホイール拡大縮小。砦は左クリック：自動出兵　右クリック：MAP表示。</p>
+{toggle_html}
 <div class="map-toolbar">
   <button type="button" class="zoom-btn" id="zoomOut" title="縮小">−</button>
   <span class="zoom-label" id="zoomLabel">100%</span>
@@ -127,21 +161,11 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
   var scale = 1, panX = 0, panY = 0;
   var drag = {{ on: false, startX: 0, startY: 0, startPanX: 0, startPanY: 0 }};
   var pinch = {{ on: false, startDist: 0, startScale: 0, startPanX: 0, startPanY: 0, centerMapX: 0, centerMapY: 0 }};
-  var listFilter = 'em';
+  var listFilter = {list_filter_js};
   var hoverPt = null;
   var statusMap_em = {{}}, statusMap_cw = {{}};
   var fortStatusUrl = {fort_status_url_js};
-  var fortStatusUrlCw = {fort_status_url_cw_js};
-  var urlEm = fortStatusUrl || 'fort_status.json';
-  var urlCw = (fortStatusUrlCw && fortStatusUrlCw !== '') ? fortStatusUrlCw : 'fort_status_c4.json';
-  Promise.all([
-    fetch(urlEm).then(function(r) {{ return r.ok ? r.json() : {{}}; }}).catch(function() {{ return {{}}; }}),
-    fetch(urlCw).then(function(r) {{ return r.ok ? r.json() : {{}}; }}).catch(function() {{ return {{}}; }})
-  ]).then(function(arr) {{
-    statusMap_em = arr[0] || {{}};
-    statusMap_cw = arr[1] || {{}};
-    draw();
-  }});
+  var fortStatusUrlCw = {fort_status_url_cw_js};{fetch_js}
 
   function toScreen(mx, my) {{
     var totalScale = baseScale * scale;
@@ -382,15 +406,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
     if (pt && pt.m) {{ e.preventDefault(); window.open(pt.m, '_blank'); }}
   }});
 
-  document.querySelectorAll('input[name="listSwitch"]').forEach(function(r) {{
-    r.addEventListener('change', function() {{
-      listFilter = document.querySelector('input[name="listSwitch"]:checked').value;
-      hoverPt = null;
-      tip.style.display = 'none';
-      draw();
-    }});
-  }});
-
+  {list_switch_script}
   window.addEventListener('resize', resize);
   resize();
 }})();
@@ -398,8 +414,6 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 </body>
 </html>
 """
-    OUT_PATH.write_text(html, encoding="utf-8")
-    print(f"Generated: {OUT_PATH} ({len(points)} points, Canvas)")
 
 
 if __name__ == "__main__":

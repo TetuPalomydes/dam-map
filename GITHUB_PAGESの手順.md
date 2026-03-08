@@ -16,7 +16,7 @@
 cd "c:\corsor\_遠征システム"
 
 git init
-git add index.html .nojekyll 遠征計画_座標マップ.html 遠征計画_座標別一覧.html
+git add index.html .nojekyll 遠征計画_座標マップ.html 遠征計画_座標マップ_w1.html 遠征計画_座標マップ_c4.html 遠征計画_座標別一覧.html
 git commit -m "遠征計画マップ・一覧を追加"
 git branch -M main
 git remote add origin https://github.com/TetuPalomydes/dam-map.git
@@ -39,7 +39,9 @@ git push -u origin main
 ## 4. 見る
 
 - トップ: `https://TetuPalomydes.github.io/dam-map/`
-- 座標マップ: `https://TetuPalomydes.github.io/dam-map/遠征計画_座標マップ.html`
+- 座標マップ（w1）: `https://TetuPalomydes.github.io/dam-map/遠征計画_座標マップ_w1.html`
+- 座標マップ（c4）: `https://TetuPalomydes.github.io/dam-map/遠征計画_座標マップ_c4.html`
+- 座標マップ（従来URL＝w1）: `https://TetuPalomydes.github.io/dam-map/遠征計画_座標マップ.html`
 - 座標別一覧: `https://TetuPalomydes.github.io/dam-map/遠征計画_座標別一覧.html`
 
 この URL を共有すれば、同じリンクで誰でも閲覧できます。
@@ -51,7 +53,7 @@ git push -u origin main
 マップや一覧を再生成したあと、同じフォルダで:
 
 ```powershell
-git add 遠征計画_座標マップ.html 遠征計画_座標別一覧.html
+git add 遠征計画_座標マップ.html 遠征計画_座標マップ_w1.html 遠征計画_座標マップ_c4.html 遠征計画_座標別一覧.html
 git commit -m "マップ・一覧を更新"
 git push
 ```
