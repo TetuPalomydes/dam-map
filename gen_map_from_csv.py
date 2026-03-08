@@ -10,7 +10,8 @@ CSV_PATH = BASE / "遠征計画_座標別一覧.csv"
 OUT_PATH = BASE / "遠征計画_座標マップ.html"
 
 # 完全自動連動: 砦攻略のAPIを指定するとマップが常に最新の攻略状況を取得する（未設定時は同梱の fort_status.json を使用）
-FORT_STATUS_URL = ""  # 例: "https://npc-strategy-sheet.vercel.app/api/fort_status"
+FORT_STATUS_URL = ""   # w用。例: "https://npc-strategy-sheet.vercel.app/api/fort_status"
+FORT_STATUS_URL_CW = ""  # c4用。例: "https://npc-strategy-sheet.vercel.app/api/fort_status?event=e1"。未設定時は FORT_STATUS_URL を流用
 
 
 def star_level(s):
@@ -58,6 +59,7 @@ def main():
     fort_json = json.dumps(points, ensure_ascii=False).replace("</", "\\u003c/")
     view_json = json.dumps({"xMin": x_min, "yMax": y_max, "w": w, "h": h, "gridStep": grid_step})
     fort_status_url_js = json.dumps(FORT_STATUS_URL)
+    fort_status_url_cw_js = json.dumps(FORT_STATUS_URL_CW)
 
     html = f"""<!DOCTYPE html>
 <html lang="ja">
@@ -96,7 +98,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 <p>座標別に砦を配置。★で等級表示。リスト切り替え・ドラッグ・ホイール拡大縮小。砦は左クリック：自動出兵　右クリック：MAP表示。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
   <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
-  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>E1</span></label>
+  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>c4</span></label>
 </div>
 <div class="map-toolbar">
   <button type="button" class="zoom-btn" id="zoomOut" title="縮小">−</button>
@@ -127,12 +129,19 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
   var pinch = {{ on: false, startDist: 0, startScale: 0, startPanX: 0, startPanY: 0, centerMapX: 0, centerMapY: 0 }};
   var listFilter = 'em';
   var hoverPt = null;
-  var statusMap = {{}};
+  var statusMap_em = {{}}, statusMap_cw = {{}};
   var fortStatusUrl = {fort_status_url_js};
-  fetch(fortStatusUrl || 'fort_status.json').then(function(r) {{ return r.ok ? r.json() : Promise.reject(); }}).then(function(o) {{
-    statusMap = o || {{}};
+  var fortStatusUrlCw = {fort_status_url_cw_js};
+  var urlEm = fortStatusUrl || 'fort_status.json';
+  var urlCw = (fortStatusUrlCw && fortStatusUrlCw !== '') ? fortStatusUrlCw : urlEm;
+  Promise.all([
+    fetch(urlEm).then(function(r) {{ return r.ok ? r.json() : {{}}; }}).catch(function() {{ return {{}}; }}),
+    fetch(urlCw).then(function(r) {{ return r.ok ? r.json() : {{}}; }}).catch(function() {{ return {{}}; }})
+  ]).then(function(arr) {{
+    statusMap_em = arr[0] || {{}};
+    statusMap_cw = arr[1] || {{}};
     draw();
-  }}).catch(function() {{}});
+  }});
 
   function toScreen(mx, my) {{
     var totalScale = baseScale * scale;
@@ -203,6 +212,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
       var r = 3 + Math.min(Math.max(p.st || 1, 5), 9);  /* ★5以下は★5と同じサイズ */
       var rad = r * totalScale;
       if (rad < 0.5) continue;
+      var statusMap = listFilter === 'em' ? statusMap_em : statusMap_cw;
       var st = statusMap[p.n];
       if (st === '攻略済' || st === '失') ctx.globalAlpha = 0.4;
       else ctx.globalAlpha = 1;
@@ -346,6 +356,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
       draw();
       if (pt) {{
         var txt = pt.n + ' (' + pt.x + ',' + pt.y + ') ' + (pt.s || '');
+        var statusMap = listFilter === 'em' ? statusMap_em : statusMap_cw;
         if (statusMap[pt.n]) txt += ' [' + statusMap[pt.n] + ']';
         if (pt.u || pt.m) tip.innerHTML = txt + '<div class="auto-link-hint">左クリック: 自動出兵　右クリック: MAP</div>';
         else tip.textContent = txt;

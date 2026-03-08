@@ -38,9 +38,9 @@ git push -u origin main
 
 ## 4. 見る
 
-- トップ: `https://【ユーザー名】.github.io/【リポジトリ名】/`
-- 座標マップ: `https://【ユーザー名】.github.io/【リポジトリ名】/遠征計画_座標マップ.html`
-- 座標別一覧: `https://【ユーザー名】.github.io/【リポジトリ名】/遠征計画_座標別一覧.html`
+- トップ: `https://TetuPalomydes.github.io/dam-map/`
+- 座標マップ: `https://TetuPalomydes.github.io/dam-map/遠征計画_座標マップ.html`
+- 座標別一覧: `https://TetuPalomydes.github.io/dam-map/遠征計画_座標別一覧.html`
 
 この URL を共有すれば、同じリンクで誰でも閲覧できます。
 

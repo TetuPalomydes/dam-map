@@ -9,8 +9,12 @@ import csv
 from pathlib import Path
 
 BASE_DIR = Path(__file__).parent
+# w 用（em6）
 MAP_BASE = "https://w1.3gokushi.jp/map.php"
 AUTO_BASE = "https://w1.3gokushi.jp/auto_send_troop/index.php"
+# E側用（cw2）砦攻略システムと合わせて c4
+MAP_BASE_CW = "https://c4.3gokushi.jp/map.php"
+AUTO_BASE_CW = "https://c4.3gokushi.jp/auto_send_troop/index.php"
 
 
 def load_regions(path: Path) -> list:
@@ -72,11 +76,15 @@ def main():
     cw2_rows = load_tsv_forts(cw2_path, "砦(cw2)")
     em6_rows = load_tsv_forts(em6_path, "砦(em6)")
 
-    # 統合: (地域, x, y, 種別, 名称, ★, …)
+    # 統合: (地域, x, y, 種別, 名称, ★, …)。w=w1, E側=c4（砦攻略システムと合わせる）
     def to_record(x, y, kind, name, star):
         region = get_region(x, y, regions)
-        map_url = f"{MAP_BASE}?x={x}&y={y}"
-        auto_url = f"{AUTO_BASE}?x={x}&y={y}"
+        if "cw2" in kind:
+            map_url = f"{MAP_BASE_CW}?x={x}&y={y}"
+            auto_url = f"{AUTO_BASE_CW}?x={x}&y={y}"
+        else:
+            map_url = f"{MAP_BASE}?x={x}&y={y}"
+            auto_url = f"{AUTO_BASE}?x={x}&y={y}"
         return (region, x, y, kind, name, star, map_url, auto_url)
 
     all_rows = []
@@ -120,7 +128,7 @@ def build_html(rows: list, path: Path, regions: list, max_rows: int = 800):
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>遠征計画 座標別一覧（w / E1 切り替え）</title>
+<title>遠征計画 座標別一覧（w / c4）</title>
 <style>
 * { box-sizing: border-box; }
 body { font-family: "Meiryo", "Yu Gothic", sans-serif; margin: 12px; background: #1a1a2e; color: #eee; }
@@ -157,10 +165,10 @@ tr[data-region].region-hidden { display: none; }
 </head>
 <body>
 <h1>遠征計画 座標別一覧（1枚シート）</h1>
-<p>砦リストを <strong>w</strong> と <strong>E1</strong> で切り替えて表示。並びは地域→Y降順→X昇順。</p>
+<p>砦リストを <strong>w</strong> と <strong>c4</strong> で切り替えて表示。並びは地域→Y降順→X昇順。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
   <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
-  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>E1</span></label>
+  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>c4</span></label>
 </div>
 <div class="region-toggle" role="group" aria-label="地域で絞り込み">
   <button type="button" class="region-btn active" data-region="">すべて</button>
@@ -345,10 +353,10 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 <body>
 <h1>遠征計画 座標マップ（シート状・位置ひと目で確認）</h1>
 <p class="nav-links"><a href="遠征計画_座標別一覧.html">座標別一覧</a></p>
-<p>座標別に砦を配置。★で等級を表示。リストを切り替えて w / E1 を表示。</p>
+<p>座標別に砦を配置。★で等級を表示。リストを切り替えて w / c4 を表示。</p>
 <div class="toggle" role="group" aria-label="リスト切り替え">
   <label class="opt-em"><input type="radio" name="listSwitch" value="em" checked> <span>w</span></label>
-  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>E1</span></label>
+  <label class="opt-cw"><input type="radio" name="listSwitch" value="cw"> <span>c4</span></label>
 </div>
 <div class="map-wrap">
 <svg id="map" viewBox="{x_min} {-y_max} {w} {h}" xmlns="http://www.w3.org/2000/svg">
