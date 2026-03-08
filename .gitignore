@@ -1,0 +1,11 @@
+# 機能的に不要（公開サイト・再ビルドに不要）
+争覇7th南東側遠征ルート計画/
+争覇7th南東側遠征ルート計画.xlsx
+N配置画像.png
+npc_strategy_em6_rows.csv
+npc_strategy_cw2_rows.csv
+cw2_npc_strategy_import.csv
+fix_em6_data.py
+em6_csv_to_txt.py
+rebuild_em6_base.py
+em6DATA.csv
