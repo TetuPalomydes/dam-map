@@ -133,7 +133,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
   var fortStatusUrl = {fort_status_url_js};
   var fortStatusUrlCw = {fort_status_url_cw_js};
   var urlEm = fortStatusUrl || 'fort_status.json';
-  var urlCw = (fortStatusUrlCw && fortStatusUrlCw !== '') ? fortStatusUrlCw : urlEm;
+  var urlCw = (fortStatusUrlCw && fortStatusUrlCw !== '') ? fortStatusUrlCw : 'fort_status_c4.json';
   Promise.all([
     fetch(urlEm).then(function(r) {{ return r.ok ? r.json() : {{}}; }}).catch(function() {{ return {{}}; }}),
     fetch(urlCw).then(function(r) {{ return r.ok ? r.json() : {{}}; }}).catch(function() {{ return {{}}; }})
