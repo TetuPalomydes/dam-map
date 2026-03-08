@@ -205,6 +205,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
 
     var drawStar = totalScale > 0.3;
     for (var i = 0; i < FORT_DATA.length; i++) {{
+      ctx.globalAlpha = 1;
       var p = FORT_DATA[i];
       if (p.l !== listFilter) continue;
       if (p.x < visX1 - 50 || p.x > visX2 + 50 || p.y < visY1 - 50 || p.y > visY2 + 50) continue;
@@ -215,7 +216,6 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
       var statusMap = listFilter === 'em' ? statusMap_em : statusMap_cw;
       var st = listFilter === 'cw' ? (statusMap[p.x + ',' + p.y] || statusMap[p.n]) : statusMap[p.n];
       if (st === '攻略済' || st === '失') ctx.globalAlpha = 0.4;
-      else ctx.globalAlpha = 1;
       ctx.fillStyle = p.l === 'cw' ? '#2d4a6e' : '#2d5a2d';
       ctx.strokeStyle = p.l === 'cw' ? '#5a8acc' : '#5acc5a';
       ctx.lineWidth = hoverPt === p ? 2 : 1;
