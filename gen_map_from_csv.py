@@ -213,7 +213,7 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
       var rad = r * totalScale;
       if (rad < 0.5) continue;
       var statusMap = listFilter === 'em' ? statusMap_em : statusMap_cw;
-      var st = statusMap[p.n];
+      var st = listFilter === 'cw' ? (statusMap[p.x + ',' + p.y] || statusMap[p.n]) : statusMap[p.n];
       if (st === '攻略済' || st === '失') ctx.globalAlpha = 0.4;
       else ctx.globalAlpha = 1;
       ctx.fillStyle = p.l === 'cw' ? '#2d4a6e' : '#2d5a2d';
@@ -357,7 +357,8 @@ h1 {{ font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }}
       if (pt) {{
         var txt = pt.n + ' (' + pt.x + ',' + pt.y + ') ' + (pt.s || '');
         var statusMap = listFilter === 'em' ? statusMap_em : statusMap_cw;
-        if (statusMap[pt.n]) txt += ' [' + statusMap[pt.n] + ']';
+        var st = listFilter === 'cw' ? (statusMap[pt.x + ',' + pt.y] || statusMap[pt.n]) : statusMap[pt.n];
+        if (st) txt += ' [' + st + ']';
         if (pt.u || pt.m) tip.innerHTML = txt + '<div class="auto-link-hint">左クリック: 自動出兵　右クリック: MAP</div>';
         else tip.textContent = txt;
         tip.style.display = 'block';

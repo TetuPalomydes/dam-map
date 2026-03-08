@@ -32,7 +32,8 @@ def find_csv(candidates):
     return None
 
 
-def build_status_map(csv_path):
+def build_status_map(csv_path, use_coord_key=False):
+    """use_coord_key=True のときは c4 用：キーを "x,y" にして遠征マップの砦名違いを吸収する。"""
     status_map = {}
     with open(csv_path, encoding="utf-8-sig") as f:
         r = csv.DictReader(f)
@@ -40,6 +41,8 @@ def build_status_map(csv_path):
             return None, "CSV にヘッダーがありません"
         name_col = "npc_name" if "npc_name" in r.fieldnames else None
         status_col = "strategy_status" if "strategy_status" in r.fieldnames else None
+        x_col = "base1_x" if "base1_x" in r.fieldnames else None
+        y_col = "base1_y" if "base1_y" in r.fieldnames else None
         if not name_col:
             for c in r.fieldnames:
                 if "name" in c.lower() or c == "NPC名":
@@ -52,11 +55,22 @@ def build_status_map(csv_path):
                     break
         if not name_col or not status_col:
             return None, f"npc_name/strategy_status に相当する列が見つかりません: {r.fieldnames}"
+        if use_coord_key and (not x_col or not y_col):
+            return None, "c4用は base1_x, base1_y 列が必要です（座標キーで紐付け）"
         for row in r:
-            name = (row.get(name_col) or "").strip()
             status = (row.get(status_col) or "").strip()
-            if name and status:
-                status_map[name] = status
+            if not status:
+                continue
+            if use_coord_key and x_col is not None and y_col is not None:
+                try:
+                    k = f"{int(row.get(x_col, 0))},{int(row.get(y_col, 0))}"
+                    status_map[k] = status
+                except (ValueError, TypeError):
+                    pass
+            else:
+                name = (row.get(name_col) or "").strip()
+                if name:
+                    status_map[name] = status
     return status_map, None
 
 
@@ -74,15 +88,15 @@ def main():
         print("w用CSVが見つかりません。以下のいずれかを配置してください:")
         for p in CSV_CANDIDATES_EM:
             print("  -", p)
-    # c4用
+    # c4用（座標キー "x,y" で出力＝遠征の砦名「北西砦818」と砦攻略の「許昌：南西砦100」の違いを吸収）
     csv_cw = find_csv(CSV_CANDIDATES_CW)
     if csv_cw:
-        status_cw, err = build_status_map(csv_cw)
+        status_cw, err = build_status_map(csv_cw, use_coord_key=True)
         if err:
             print("c4用:", err)
         else:
             OUT_PATH_CW.write_text(json.dumps(status_cw, ensure_ascii=False, indent=0), encoding="utf-8")
-            print(f"Generated: {OUT_PATH_CW} ({len(status_cw)} entries, c4用 from {csv_cw.name})")
+            print(f"Generated: {OUT_PATH_CW} ({len(status_cw)} entries, c4用 座標キー from {csv_cw.name})")
     else:
         print("c4用CSVが見つかりません（任意）。以下のいずれかを置くと fort_status_c4.json を生成:")
         for p in CSV_CANDIDATES_CW:
