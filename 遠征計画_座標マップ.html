@@ -58,7 +58,7 @@ h1 { font-size: 1.1rem; margin-bottom: 6px; color: #e0e0e0; }
   var hoverPt = null;
   var statusMap_em = {}, statusMap_cw = {};
   var fortStatusUrl = "";
-  var fortStatusUrlCw = "";
+  var fortStatusUrlCw = "https://npc-strategy-sheet.vercel.app/api/fort_status?event=e1";
   var urlEm = fortStatusUrl || 'fort_status.json';
   fetch(urlEm).then(function(r) { return r.ok ? r.json() : {}; }).catch(function() { return {}; }).then(function(o) {
     statusMap_em = o || {};
